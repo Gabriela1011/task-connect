@@ -16,6 +16,7 @@ public class Transaction {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotNull(message = "amount is required")
     @DecimalMin(value = "0.0", message = "Amount cannot be negative")
     @Column(precision = 10, scale = 2, nullable = false, updatable = false)
     private BigDecimal amount;

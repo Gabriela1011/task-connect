@@ -1,6 +1,8 @@
 package com.example.task_connect.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
@@ -33,23 +35,30 @@ public class User {
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private Profile profile;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Valid
     private List<Address> addresses = new ArrayList<>();
 
     //Tasks this user created
+    @JsonIgnore
     @OneToMany(mappedBy = "requester",  cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Task> requestedTasks = new ArrayList<>();
 
     //Tasks this user is assigned to do
+    @JsonIgnore
     @OneToMany(mappedBy = "tasker", fetch = FetchType.LAZY)
     private List<Task> assignedTasks = new ArrayList<>();
 
+    @JsonIgnore
     @OneToMany(mappedBy = "tasker",cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Bid> bids = new ArrayList<>();
 
+    @JsonIgnore
     @OneToMany(mappedBy = "reviewer", fetch =  FetchType.LAZY)
     private List<Review> reviewsGiven = new ArrayList<>();
 
+    @JsonIgnore
     @OneToMany(mappedBy = "reviewed", fetch = FetchType.LAZY)
     private List<Review> reviewsReceived = new ArrayList<>();
 
