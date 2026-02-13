@@ -1,6 +1,7 @@
 package com.example.task_connect.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.*;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
@@ -17,6 +18,7 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Schema(description = "Unique email address for the user")
     @NotBlank(message = "Email is required")
     @Email(message = "Invalid email format")
     @Column(unique = true, nullable = false)
@@ -36,7 +38,7 @@ public class User {
     private Profile profile;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     @Valid
     private List<Address> addresses = new ArrayList<>();
 
@@ -85,7 +87,7 @@ public class User {
 
 
     public List<Address> getAddresses() { return addresses; }
-    //public void setAddresses(List<Address> addresses) { this.addresses = addresses; }
+    public void setAddresses(List<Address> addresses) { this.addresses = addresses; }
 
     //helper method to add an address
     //this should be used in SERVICE

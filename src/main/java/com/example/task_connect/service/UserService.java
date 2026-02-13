@@ -18,7 +18,6 @@ import java.math.BigDecimal;
 @Service
 public class UserService {
     private final UserRepository userRepository;
-    private final ProfileRepository profileRepository;
     private final AddressRepository addressRepository;
 
     @Autowired
@@ -26,7 +25,6 @@ public class UserService {
                        ProfileRepository profileRepository,
                        AddressRepository addressRepository) {
         this.userRepository = userRepository;
-        this.profileRepository = profileRepository;
         this.addressRepository = addressRepository;
     }
 
@@ -37,11 +35,14 @@ public class UserService {
             throw new UserAlreadyExistsException("The email " + user.getEmail() + " is already registered.");
         });
 
-        //initialize profile
-        Profile profile = (user.getProfile() != null)
-                ? user.getProfile()
-                : new Profile();
+        if (user.getProfile() == null ||
+                user.getProfile().getFirstName() == null ||
+                user.getProfile().getLastName() == null) {
+            throw new IllegalArgumentException("Profile information (First Name and Last Name) is required.");
+        }
 
+        //initialize profile
+        Profile profile = user.getProfile();
         user.setProfile(profile);
         profile.updateTaskerRating(BigDecimal.ZERO);
         profile.updateRequesterRating(BigDecimal.ZERO);

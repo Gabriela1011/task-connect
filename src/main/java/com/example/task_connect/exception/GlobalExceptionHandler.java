@@ -15,31 +15,13 @@ public class GlobalExceptionHandler {
     //handle account uniqueness
     @ExceptionHandler(UserAlreadyExistsException.class)
     public ResponseEntity<ErrorResponse> handleUserAlreadyExists(UserAlreadyExistsException e, WebRequest request) {
-        HttpStatus status = HttpStatus.CONFLICT; //409
-
-        ErrorResponse errorResponse = new ErrorResponse(
-                status.value(),
-                status.getReasonPhrase(),
-                e.getMessage(),
-                request.getDescription(false) //path
-        );
-
-        return new ResponseEntity<>(errorResponse, status);
+        return createErrorResponse(HttpStatus.CONFLICT, e.getMessage(), request);
     }
 
     //handle user not found
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleUserNotFound(UserNotFoundException e, WebRequest request) {
-        HttpStatus status = HttpStatus.NOT_FOUND; // 404
-
-        ErrorResponse errorResponse = new ErrorResponse(
-                status.value(),
-                status.getReasonPhrase(),
-                e.getMessage(),
-                request.getDescription(false)
-        );
-
-        return new ResponseEntity<>(errorResponse, status);
+        return createErrorResponse(HttpStatus.NOT_FOUND, e.getMessage(), request);
     }
 
     //handle validation errors
@@ -61,6 +43,22 @@ public class GlobalExceptionHandler {
                 request.getDescription(false)
         );
 
+        return new ResponseEntity<>(errorResponse, status);
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException e, WebRequest request) {
+        return createErrorResponse(HttpStatus.BAD_REQUEST, e.getMessage(), request);
+    }
+
+
+    private ResponseEntity<ErrorResponse> createErrorResponse(HttpStatus status, String message, WebRequest request) {
+        ErrorResponse errorResponse = new ErrorResponse(
+                status.value(),
+                status.getReasonPhrase(),
+                message,
+                request.getDescription(false)
+        );
         return new ResponseEntity<>(errorResponse, status);
     }
 }
