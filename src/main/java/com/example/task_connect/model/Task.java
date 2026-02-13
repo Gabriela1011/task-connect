@@ -1,6 +1,8 @@
 package com.example.task_connect.model;
 
 import com.example.task_connect.model.enums.TaskStatus;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
@@ -32,7 +34,6 @@ public class Task {
     private BigDecimal budget;
 
     @Enumerated(EnumType.STRING)
-    @Size(max = 20)
     @Column(nullable = false, length = 20)
     private TaskStatus status = TaskStatus.OPEN;
 
@@ -42,28 +43,34 @@ public class Task {
     @NotNull(message = "requester_id is required")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "requester_id", referencedColumnName = "id", nullable = false)
+    @JsonIgnoreProperties({"requestedTasks", "assignedTasks", "addresses", "bids", "reviewsGiven", "reviewsReceived", "password"})
     private User requester;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tasker_id", referencedColumnName = "id")
+    @JsonIgnoreProperties({"requestedTasks", "assignedTasks", "addresses", "bids", "reviewsGiven", "reviewsReceived", "password"})
     private User tasker;
 
     @NotNull(message = "Category is required")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id", referencedColumnName = "id", nullable = false)
+    @JsonIgnoreProperties("tasks")
     private Category category;
 
     @NotNull(message = "Address is required")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "address_id", referencedColumnName = "id", nullable = false)
+    @JsonIgnoreProperties({"tasksAtAddress", "user"})
     private Address address;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "task", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Bid> bids = new ArrayList<>();
 
     @OneToOne(mappedBy = "task")
     private Transaction transaction;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "task", fetch = FetchType.LAZY)
     private List<Review> reviews = new ArrayList<>();
 

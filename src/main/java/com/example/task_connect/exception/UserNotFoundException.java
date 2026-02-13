@@ -1,6 +1,6 @@
 package com.example.task_connect.exception;
 
-public class UserNotFoundException extends RuntimeException{
+public class UserNotFoundException extends ResourceNotFoundException{
     public UserNotFoundException(String message) {
         super(message);
     }

@@ -7,6 +7,7 @@ import com.example.task_connect.model.Profile;
 import com.example.task_connect.model.User;
 import com.example.task_connect.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +36,7 @@ class UserControllerTest {
     private UserService userService;
 
     private final ObjectMapper objectMapper = new ObjectMapper()
-            .registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
+            .registerModule(new JavaTimeModule());
 
     @Test
     @DisplayName("POST /api/users - Success (201 Created)")
