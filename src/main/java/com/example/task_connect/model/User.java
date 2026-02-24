@@ -37,7 +37,7 @@ public class User {
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private Profile profile;
 
-    @JsonIgnore
+    //@JsonIgnore
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     @Valid
     private List<Address> addresses = new ArrayList<>();

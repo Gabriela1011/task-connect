@@ -157,4 +157,6 @@ class UserControllerTest {
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("Names are mandatory"));
     }
+
+
 }

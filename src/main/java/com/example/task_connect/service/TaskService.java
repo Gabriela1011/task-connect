@@ -3,14 +3,10 @@ package com.example.task_connect.service;
 import com.example.task_connect.dto.TaskRequestDTO;
 import com.example.task_connect.exception.ResourceNotFoundException;
 import com.example.task_connect.exception.UserNotFoundException;
-import com.example.task_connect.model.Address;
-import com.example.task_connect.model.Category;
-import com.example.task_connect.model.Task;
-import com.example.task_connect.model.User;
-import com.example.task_connect.repository.AddressRepository;
-import com.example.task_connect.repository.CategoryRepository;
-import com.example.task_connect.repository.TaskRepository;
-import com.example.task_connect.repository.UserRepository;
+import com.example.task_connect.model.*;
+import com.example.task_connect.model.enums.BidStatus;
+import com.example.task_connect.model.enums.TaskStatus;
+import com.example.task_connect.repository.*;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -20,13 +16,15 @@ public class TaskService {
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final AddressRepository addressRepository;
+    private final BidRepository bidRepository;
 
     public TaskService(TaskRepository taskRepository, UserRepository userRepository,
-                       CategoryRepository categoryRepository, AddressRepository addressRepository) {
+                       CategoryRepository categoryRepository, AddressRepository addressRepository, BidRepository bidRepository) {
         this.taskRepository = taskRepository;
         this.userRepository = userRepository;
         this.categoryRepository = categoryRepository;
         this.addressRepository = addressRepository;
+        this.bidRepository = bidRepository;
     }
 
     @Transactional
@@ -51,5 +49,32 @@ public class TaskService {
         task.setAddress(address);
 
         return taskRepository.save(task);
+    }
+
+    @Transactional
+    public void acceptBid(Long taskId, Long bidId) {
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new ResourceNotFoundException("Task not found with ID: " + taskId));
+
+        if (task.getStatus() != TaskStatus.OPEN) {
+            throw new IllegalStateException("Task is " + task.getStatus() + ". Only OPEN tasks can accept bids.");
+        }
+
+        Bid winningBid = bidRepository.findById(bidId)
+                .orElseThrow(() -> new ResourceNotFoundException("Bid not found with ID: " + bidId));
+
+        if (!winningBid.getTask().getId().equals(taskId)) {
+            throw new IllegalArgumentException("This bid does not belong to the specified task.");
+        }
+
+        winningBid.updateStatus(BidStatus.ACCEPTED);
+        task.updateStatus(TaskStatus.ASSIGNED);
+
+        task.setTasker(winningBid.getTasker());
+        task.getBids().stream()
+                .filter(bid -> !bid.getId().equals(bidId) && bid.getStatus() == BidStatus.PENDING)
+                .forEach(bid -> bid.updateStatus(BidStatus.REJECTED));
+
+        taskRepository.save(task);
     }
 }

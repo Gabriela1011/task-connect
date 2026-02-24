@@ -11,10 +11,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/tasks")
@@ -40,5 +37,25 @@ public class TaskController {
     public ResponseEntity<Task> createTask(@Valid @RequestBody TaskRequestDTO taskRequest) {
         Task createdTask = taskService.createTask(taskRequest);
         return new ResponseEntity<>(createdTask, HttpStatus.CREATED);
+    }
+
+
+    @Operation(
+            summary = "Accept a bid and assign the task",
+            description = "Transitions the task to ASSIGNED and the selected bid to ACCEPTED. " +
+                    "Automatically rejects all other pending bids for this task."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Success: Task assigned and bid accepted"),
+            @ApiResponse(responseCode = "400", description = "Task is not OPEN or bid mismatch"),
+            @ApiResponse(responseCode = "404", description = "Task or Bid not found")
+    })
+    @PatchMapping("/{taskId}/bids/{bidId}")
+    public ResponseEntity<String> acceptBid(
+            @PathVariable Long taskId,
+            @PathVariable Long bidId) {
+
+        taskService.acceptBid(taskId, bidId);
+        return ResponseEntity.ok("Collaboration started! Task assigned and bid accepted.");
     }
 }

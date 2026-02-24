@@ -19,10 +19,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.math.BigDecimal;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(TaskController.class)
 class TaskControllerTest {
@@ -98,6 +99,39 @@ class TaskControllerTest {
                 .andExpect(jsonPath("$.message").value("Category or Address not found"));
     }
 
+    //PATCH
+
+    @Test
+    @DisplayName("PATCH /api/tasks/{taskId}/bids/{bidId} - Success (200 OK)")
+    void acceptBid_Success() throws Exception {
+        mockMvc.perform(patch("/api/tasks/1/bids/5"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Collaboration started! Task assigned and bid accepted."));
+
+        verify(taskService, times(1)).acceptBid(1L, 5L);
+    }
+
+    @Test
+    @DisplayName("PATCH /api/tasks/{taskId}/bids/{bidId} - 400 Bad Request (Illegal State)")
+    void acceptBid_TaskAlreadyAssigned() throws Exception {
+        doThrow(new IllegalStateException("Task is ASSIGNED. Only OPEN tasks can accept bids."))
+                .when(taskService).acceptBid(anyLong(), anyLong());
+
+        mockMvc.perform(patch("/api/tasks/1/bids/5"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Task is ASSIGNED. Only OPEN tasks can accept bids."));
+    }
+
+    @Test
+    @DisplayName("PATCH /api/tasks/{taskId}/bids/{bidId} - 404 Not Found")
+    void acceptBid_NotFound() throws Exception {
+        doThrow(new ResourceNotFoundException("Bid not found with ID: 5"))
+                .when(taskService).acceptBid(anyLong(), anyLong());
+
+        mockMvc.perform(patch("/api/tasks/1/bids/5"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("Bid not found with ID: 5"));
+    }
 
     private TaskRequestDTO createValidDTO() {
         TaskRequestDTO dto = new TaskRequestDTO();

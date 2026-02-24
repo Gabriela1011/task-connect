@@ -1,6 +1,7 @@
 package com.example.task_connect.model;
 
 import com.example.task_connect.model.enums.BidStatus;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
@@ -35,11 +36,13 @@ public class Bid {
     @NotNull(message = "Task is required")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "task_id", referencedColumnName = "id", nullable = false)
+    @JsonIgnoreProperties({"bids", "requester", "address", "category", "reviews"})
     private Task task;
 
     @NotNull(message = "Bidder (Tasker) is required")
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "tasker_id", referencedColumnName = "id", nullable = false)
+    @JsonIgnoreProperties({"requestedTasks", "assignedTasks", "bids", "password", "addresses"})
     private User tasker;
 
 
